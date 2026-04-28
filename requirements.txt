@@ -1,0 +1,8 @@
+numpy<2
+pandas
+matplotlib
+scikit-learn
+nltk
+joblib
+torch
+PIL
