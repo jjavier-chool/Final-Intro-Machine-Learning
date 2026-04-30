@@ -2,7 +2,6 @@
 The final project for CS429.
 
 ## TODO:
-- Task 1:
 - Task 2:
 - Task 3:
 - Task 4:
