@@ -13,13 +13,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # BMP -> binary matrix. white = 1, black = 0
-def load_bmp_matrix(path, threshold=128):
+def load_bmp_matrix(path: str, threshold=128):
   img = Image.open(path).convert("L")
   matrix = np.array(img)
   return (matrix >= threshold).astype(int)
 
 # Build abstraction via pooling. Any black pixels -> black (= 0)
-def abstract_map(binary_map, rows, cols):
+def abstract_map(binary_map: np.ndarray, rows: int, cols: int):
   orig_rows, orig_cols = binary_map.shape
   abstracted = np.ones((rows, cols), dtype=int)
 
