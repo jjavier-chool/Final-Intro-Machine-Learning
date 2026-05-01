@@ -10,7 +10,7 @@ Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from PIL import Image
 import numpy as np
-import sys
+import matplotlib.pyplot as plt
 
 # BMP -> binary matrix. white = 1, black = 0
 def load_bmp_matrix(path, threshold=128):
@@ -19,17 +19,17 @@ def load_bmp_matrix(path, threshold=128):
   return (matrix >= threshold).astype(int)
 
 # Build abstraction via pooling. Any black pixels -> black (= 0)
-def abstract_map(binary_map, target_rows, target_cols):
+def abstract_map(binary_map, rows, cols):
   orig_rows, orig_cols = binary_map.shape
-  abstracted = np.ones((target_rows, target_cols), dtype=int)
+  abstracted = np.ones((rows, cols), dtype=int)
 
-  for i in range(target_rows):
-    for j in range(target_cols):
-      r_start = int(i * orig_rows / target_rows)
-      r_end   = int((i + 1) * orig_rows / target_rows)
+  for i in range(rows):
+    for j in range(cols):
+      r_start = i * orig_rows // rows
+      r_end   = (i + 1) * orig_rows // rows
 
-      c_start = int(j * orig_cols / target_cols)
-      c_end   = int((j + 1) * orig_cols / target_cols)
+      c_start = j * orig_cols // cols
+      c_end   = (j + 1) * orig_cols // cols
 
       block = binary_map[r_start:r_end, c_start:c_end]
 
@@ -39,32 +39,34 @@ def abstract_map(binary_map, target_rows, target_cols):
   return abstracted
 
 # Retrieve the specific map asked for
-def get_abstract_map(num, target_rows=40, target_cols=40):
-  path = "maps/map" + str(num) + ".bmp"
+def get_abstract_map(num: int, rows: int=40, cols: int=40):
+  path = f"maps/map{num}.bmp"
   og_map = load_bmp_matrix(path)
-  return abstract_map(og_map, target_rows, target_cols)
+  return abstract_map(og_map, rows, cols)
 
 # Testing
 def main():
-  target_rows = [20, 40, 50, 50]
-  target_cols = [20, 40, 50, 50]
-  for i in range(1,5):
+  rows = [20, 40, 50, 50]
+  cols = [20, 40, 50, 50]
+
+  for i, (row, col) in enumerate(zip(rows, cols), 1):
     print(f"Processing: map{i}")
 
-    og_map = load_bmp_matrix("maps/map" + str(i) + ".bmp")
-    abstracted = abstract_map(og_map, target_rows[i-1], target_cols[i-1])
+    og_map = load_bmp_matrix(f"maps/map{i}.bmp")
+    abstracted = abstract_map(og_map, row, col)
 
-    og_shape = og_map.shape
-    new_shape = abstracted.shape
-
-    print(f"Original size: {og_shape}")
-    print(f"Abstracted size: {new_shape}")
+    print(f"Original size: {og_map.shape}")
+    print(f"Abstracted size: {abstracted.shape}")
     img_array = (abstracted * 255).astype(np.uint8)
-    img = Image.fromarray(img_array, mode='L')
-    img.save("map" + str(i) + ".bmp")
+    # mode parameter is deprecated in .fromarray PIL 15
+    img = Image.fromarray(img_array)
+    img.save(f"map{i}.bmp")
+
+    plt.subplot(1, 4, i)
+    plt.imshow(img, cmap='gray')
+  plt.show()
 
   print("All maps processed successfully.")
-
 
 if __name__ == "__main__":
     main()
