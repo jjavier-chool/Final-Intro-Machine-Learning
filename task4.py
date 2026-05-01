@@ -5,8 +5,19 @@ Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from tqdm import tqdm
 
+from task2 import GridEnvironment, Point
+from task3 import Agent
+
 # SARSA algorithm, adopted from the slides' pseudocode
-def sarsa(env, agent, episodes=5000, alpha=0.1, gamma=0.9, start_state=(0, 0), max_steps=1000):
+def sarsa(
+    env: GridEnvironment,
+    agent: Agent,
+    episodes: int=5000,
+    alpha: float=0.1,
+    gamma: float=0.9,
+    start_state: Point=Point(0, 0),
+    max_steps: int=1000
+  ):
   # "Loop for each episode"
   for ep in tqdm(range(episodes), desc="SARSA Training"):
     # Init S, choose A from S using policy derived from Q
