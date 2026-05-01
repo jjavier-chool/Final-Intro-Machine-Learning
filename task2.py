@@ -12,6 +12,7 @@ class GridEnvironment:
   # Constructor that takes name (for plotting purposes), the abstracted map, target pos, and S1/S2
   def __init__(self, name, grid_map, target, reward_strategy="S1"):
     """
+    name: 1, 2, 3, or 4
     grid_map: 2D numpy array (1 = free, 0 = obstacle)
     target: (row, col)
     reward_strategy: "S1" or "S2"

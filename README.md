@@ -3,10 +3,8 @@ The final project for CS429.
 
 ## TODO:
 - Ensure good documentation comments in each file
-- Task 3: Agent w/ Q-table
-- Task 4: SARSA
-- Task 5: Q-Learning
-- Task 6: All required comparisons
+- Task 2: Method for enlargening: map1 needs 20x20 to become 40x40
+- Task 6: tuning, ensure correctness
 - Report on Overleaf
 
 ## How to Run
@@ -14,9 +12,6 @@ You can run tasks manually using each of:
 ```console
 python task1.py
 python task2.py
-python task3.py
-python task4.py
-python task5.py
 python task6.py
 ```
 
