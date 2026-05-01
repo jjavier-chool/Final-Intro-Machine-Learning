@@ -83,7 +83,7 @@ def accuracy_path(env, agent, max_steps=500):
 def complexity_test():
   print("\n=== Complexity Test ===")
 
-  # TODO: all need to be 40, but first is 20x20. Add enlargening to task2.py
+  # TODO: all need to be 40, but first is 20x20. Add enlargening to task1.py
   target_rows = [20, 40, 40, 40]
   target_cols = [20, 40, 40, 40]
   map_episodes = [10000, 10000, 10000, 10000]

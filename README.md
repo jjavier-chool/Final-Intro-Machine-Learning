@@ -3,7 +3,7 @@ The final project for CS429.
 
 ## TODO:
 - Ensure good documentation comments in each file
-- Task 2: Method for enlargening: map1 needs 20x20 to become 40x40
+- Task 1: Method for enlargening: map1 needs 20x20 to become 40x40
 - Task 6: tuning, ensure correctness
 - Report on Overleaf
 
