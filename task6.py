@@ -234,7 +234,7 @@ def plot_policy(agent: Agent, env: GridEnvironment):
     seen.add(state)
     
     r, c = state
-    state, _ = env.step(state, agent.best_action(state, ties='deterministic'))
+    state, _ = env.step(state, agent.best_action(state, random=False)
     
     if state in seen:
       plt.scatter((c + state[1])/2, (r + state[0])/2, s=100, c='red')
