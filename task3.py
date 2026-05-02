@@ -32,13 +32,16 @@ class Agent:
     return self.best_action(state)
 
   # Used in task6.py when finding accuracy
-  def best_action(self, state: Point):
+  def best_action(self, state: Point, ties='random'):
     # Can't just use argmax because we need to break ties randomly. This is
     # equivalent to argmax without ties.
-    A = self.Q[state]
-    a = np.random.choice(np.where(A == A.max())[0])
-    return self.actions[a]
-
+    if ties == 'random':
+      A = self.Q[state]
+      a = np.random.choice(np.where(A == A.max())[0])
+      return self.actions[a]
+    else:
+      return self.actions[self.Q[state].argmax()]
+    
   # Getter
   def get_q(self, state: Point, action: Action):
     return self.Q[*state, self.action_to_index[action]]
