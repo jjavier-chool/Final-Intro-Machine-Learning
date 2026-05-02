@@ -3,27 +3,25 @@ Intro to Machine Learning Final
 Encompasses the solution to Task 2.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
-from typing import Literal, NamedTuple
+from collections import namedtuple
+from typing import TYPE_CHECKING, Literal, NamedTuple
 import numpy as np
 import matplotlib.pyplot as plt
 from task1 import get_abstract_map
 
 type Action = Literal['up', 'down', 'left', 'right']
 type Reward = int
-type Strategy = Literal["S1", "S2"]
 
-class Point(NamedTuple):
-  row: int
-  col: int
+type Point = tuple[int, int]
 
 # For S2, closer to target reward calculation
 def manhattan(s1, s2):
-  return abs(s1.row - s2.row) + abs(s1.col - s2.col)
+  return abs(s1[0] - s2[0]) + abs(s1[1] - s2[1])
   
 # The Environment Class
 class GridEnvironment:
   # Constructor that takes name (for plotting purposes), the abstracted map, target pos, and S1/S2
-  def __init__(self, name: int, grid_map: np.ndarray, target: Point, reward_strategy: Strategy="S1"):
+  def __init__(self, name: int, grid_map: np.ndarray, target: Point, reward_strategy: str="S1"):
     """
     name: 1, 2, 3, or 4
     grid_map: 2D numpy array (1 = free, 0 = obstacle)
@@ -53,10 +51,10 @@ class GridEnvironment:
     """
 
     dr, dc = self.actions[action]
-    next_state = Point(state.row + dr, state.col + dc)
+    next_state = (state[0] + dr, state[1] + dc)
 
     # Boundary check
-    if not (0 <= next_state.row < self.rows and 0 <= next_state.col < self.cols):
+    if not (0 <= next_state[0] < self.rows and 0 <= next_state[1] < self.cols):
       return state, -100
 
     # Obstacle check
@@ -90,7 +88,7 @@ class GridEnvironment:
     plt.title(f"Grid Environment {self.name}")
 
     # Mark target
-    plt.scatter(self.target.col, self.target.row, c='red', marker='X')
+    plt.scatter(self.target[1], self.target[0], c='red', marker='X')
 
     plt.gca().invert_yaxis()
     plt.savefig(f"{self.name}.png")
@@ -98,8 +96,8 @@ class GridEnvironment:
 # Test
 def main():
   grid = get_abstract_map(2, 40, 40)
-  env = GridEnvironment(2, grid, target=Point(39, 39), reward_strategy="S2")
-  state = Point(38, 38)
+  env = GridEnvironment(2, grid, target=(39, 39), reward_strategy="S2")
+  state = (38, 38)
   next_state, reward = env.step(state, "right")
   print("Next:", next_state, "Reward:", reward)
   env.plot()

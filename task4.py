@@ -15,7 +15,7 @@ def sarsa(
     episodes: int=5000,
     alpha: float=0.1,
     gamma: float=0.9,
-    start_state: Point=Point(0, 0),
+    start_state: Point=(0, 0),
     max_steps: int=1000
   ):
   # "Loop for each episode"

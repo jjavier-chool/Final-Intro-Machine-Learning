@@ -15,6 +15,12 @@ import matplotlib.pyplot as plt
 # BMP -> binary matrix. white = 1, black = 0
 def load_bmp_matrix(path: str, threshold=128):
   img = Image.open(path).convert("L")
+  w, h = img.size
+  if w < 40 or h < 40:
+    # Make it an integer multiple of (w, h) to avoid distortions
+    w = (40 // w + 1)*w
+    h = (40 // h + 1)*h
+    img = img.resize((w, h), resample=Image.Resampling.BOX)
   matrix = np.array(img)
   return (matrix >= threshold).astype(int)
 
@@ -46,8 +52,8 @@ def get_abstract_map(num: int, rows: int=40, cols: int=40):
 
 # Testing
 def main():
-  rows = [20, 40, 50, 50]
-  cols = [20, 40, 50, 50]
+  rows = [40, 40, 50, 50]
+  cols = [40, 40, 50, 50]
 
   for i, (row, col) in enumerate(zip(rows, cols), 1):
     print(f"Processing: map{i}")

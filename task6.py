@@ -4,7 +4,7 @@ Encompasses the solution to Task 6.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from task1 import get_abstract_map
-from task2 import GridEnvironment
+from task2 import GridEnvironment, Point
 from task3 import Agent
 from task4 import sarsa
 from task5 import q_learning
@@ -13,9 +13,11 @@ import torch
 import time
 import sys
 
+import matplotlib.pyplot as plt
+
 # Helper: Train
 #TODO: tune episodes for each test
-def train(env, method, epsilon, gamma, episodes=10000):
+def train(env: GridEnvironment, method: str, epsilon: float, gamma: float, episodes: int=10000):
   agent = Agent(env.rows, env.cols, ["up", "down", "left", "right"], epsilon=epsilon)
 
   start = time.time()
@@ -30,7 +32,7 @@ def train(env, method, epsilon, gamma, episodes=10000):
 
 # Helper: accuracy + extra path metrics
 #TODO: length kinda pointless? remove?
-def accuracy_path(env, agent, max_steps=500):
+def accuracy_path(env: GridEnvironment, agent: Agent, max_steps: int=500):
   rows, cols = env.rows, env.cols
 
   valid = 0
@@ -84,23 +86,40 @@ def complexity_test():
   print("\n=== Complexity Test ===")
 
   # TODO: all need to be 40, but first is 20x20. Add enlargening to task1.py
-  target_rows = [20, 40, 40, 40]
-  target_cols = [20, 40, 40, 40]
+  target_rows = [40, 40, 40, 40]
+  target_cols = [40, 40, 40, 40]
   map_episodes = [10000, 10000, 10000, 10000]
 
   for i in range(1,5):
     grid = get_abstract_map(i, target_rows[i-1], target_cols[i-1])
+    '''
+    plt.imshow(grid, cmap='gray')
+    plt.scatter(20, 20)
+    plt.scatter(0, 0)
+    plt.show()
+    '''
     env = GridEnvironment(i, grid, target=(39, 39), reward_strategy="S2")
 
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=0.5, gamma=0.5, map_episodes[i-1])
+      agent, t = train(env, method, epsilon=0.5, gamma=0.5, episodes=map_episodes[i-1])
 
-      acc, avg_len, longest = accuracy_path(env, agent)
+      acc, avg, longest = accuracy_path(env, agent)
 
-      print(f"map{i} | {method} | time={t:.2f}s | episodes={map_episodes[i-1]} | acc={acc:.3f} | avg={avg_len:.2f} | longest={longest}")
+      print(" | ".join([
+        f"map {i}",
+        method,
+        f"{t=:.2f}s",
+        f"episodes={map_episodes[i-1]}",
+        f"{acc=:.3f}",
+        f"{avg=:.2f}",
+        f"{longest=!s}"
+      ]))
+      print()
+
+      plot_policy(agent, env)
 
 # 2. Exploration Test
-def exploration_test(grid):
+def exploration_test(grid: np.ndarray):
   print("\n=== Exploration Test ===")
 
   env = GridEnvironment(4, grid, target=(39, 39), reward_strategy="S2")
@@ -109,15 +128,26 @@ def exploration_test(grid):
 
   for eps in [0, 0.5, 1]:
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=eps, gamma=0.5, tune_episodes[i])
+      agent, t = train(env, method, epsilon=eps, gamma=0.5, episodes=tune_episodes[i])
 
-      acc, avg_len, longest = accuracy_path(env, agent)
+      acc, avg, longest = accuracy_path(env, agent)
 
-      print(f"eps={eps} | {method} | time={t:.2f}s | episodes={tune_episodes[i]} | acc={acc:.3f} | avg={avg_len:.2f} | longest={longest}")
+      print(" | ".join([
+        f"{eps=}",
+        method,
+        f"{t=:.2f}s",
+        f"episodes={tune_episodes[i]}",
+        f"{acc=:.3f}",
+        f"{avg=:.2f}",
+        f"{longest=!s}"
+      ]))
+      print()
       i = i + 1
 
+      plot_policy(agent, env)
+
 # 3. Discount Test
-def discount_test(grid):
+def discount_test(grid: np.ndarray):
   print("\n=== Discount Test ===")
 
   env = GridEnvironment(4, grid, target=(39, 39), reward_strategy="S2")
@@ -126,15 +156,26 @@ def discount_test(grid):
 
   for gamma in [0.1, 0.5, 1]:
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=0.5, gamma=gamma, tune_episodes[i])
+      agent, t = train(env, method, epsilon=0.5, gamma=gamma, episodes=tune_episodes[i])
 
-      acc, avg_len, longest = accuracy_path(env, agent)
+      acc, avg, longest = accuracy_path(env, agent)
 
-      print(f"gamma={gamma} | {method} | time={t:.2f}s | episodes={tune_episodes[i]} | acc={acc:.3f} | avg={avg_len:.2f} | longest={longest}")
+      print(" | ".join([
+        f"{gamma=}",
+        method,
+        f"{t=:.2f}s",
+        f"episodes={tune_episodes[i]}",
+        f"{acc=:.3f}",
+        f"{avg=:.2f}",
+        f"{longest=!s}"
+      ]))
+      print()
       i = i + 1
 
+      plot_policy(agent, env)
+
 # 4. Reward Strategy Test
-def reward_test(grid):
+def reward_test(grid: np.ndarray):
   print("\n=== Reward Strategy Test ===")
 
   # TODO: Find from previous 2 tests
@@ -147,32 +188,82 @@ def reward_test(grid):
     env = GridEnvironment(4, grid, target=(39, 39), reward_strategy=strategy)
 
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=best_eps, gamma=best_gamma, tune_episodes[i])
+      agent, t = train(env, method, best_eps, best_gamma, tune_episodes[i])
 
       acc, avg_len, longest = accuracy_path(env, agent)
 
-      print(f"{strategy} | {method} | time={t:.2f}s | episodes={tune_episodes[i]} | acc={acc:.3f} | avg={avg_len:.2f} | longest={longest}")
+      print(' | '.join([
+        strategy,
+        method,
+        f"time={t:.2f}s",
+        f"episodes={tune_episodes[i]}",
+        f"{acc=:.3f}",
+        f"avg={avg_len:.2f}",
+        f"{longest=!s}"
+      ]))
+      print()
       i = i + 1
+
+      plot_policy(agent, env)
+
+def softmax(x: np.ndarray):
+  a = np.exp(x - x.max(axis=-1, keepdims=True))
+  return a/a.sum(axis=-1, keepdims=True)
+
+def plot_policy(agent: Agent, env: GridEnvironment):
+  '''
+  Plot an image of the map overlaid with arrows indicating the agent's policy.
+  '''
+  # Plot the map itself
+  plt.imshow(env.map, cmap='gray')
+
+  # For every position, convert the action to its delta to plot an arrow
+  h, w = env.map.shape
+  action_delta = np.array([(-1, 0), (1, 0), (0, -1), (0,1)])
+  flow = softmax(agent.Q) @ action_delta
+  #flow = np.eye(4)[agent.Q.argmax(axis=-1)] @ action_delta
+  dy = flow[..., 0]
+  dx = flow[..., 1]
+  y, x = np.mgrid[0:h, 0:w]
+  plt.quiver(x, y, dx, -dy, color='red')
+
+  # Plot the best path, stopping if it ever loops
+  seen = set()
+  state = (0, 0)
+  while state != (39, 39):
+    seen.add(state)
+    
+    r, c = state
+    state, _ = env.step(state, agent.best_action(state))
+    
+    if state in seen:
+      plt.scatter((c + state[1])/2, (r + state[0])/2, s=100, c='red')
+      break
+    else:
+      plt.plot([c, state[1]], [r, state[0]] , c='blue')
+
+  # Plot the start and goal
+  plt.scatter([0, 39], [0, 39])
+
+  plt.axis("equal")
+  plt.show()
 
 # Main
 def main(todo: str = 'all'):
   torch.manual_seed(42)
   grid = get_abstract_map(4, 50, 50)
 
-  if todo == '1' or todo == 'all':
-    complexity_test()
-
-  if todo == '2' or todo == 'all':
-    exploration_test(grid)
-
-  if todo == '3' or todo == 'all':
-    discount_test(grid)
-
-  if todo == '4' or todo == 'all':
-    reward_test(grid)
-
+  if todo == 'all':
+    todo = '1,2,3,4'
+  
+  for task in todo.split(','):
+    match task:
+      case '1': complexity_test()
+      case '2': exploration_test(grid)
+      case '3': discount_test(grid)
+      case '4': reward_test(grid)
+  
   # Extra custom map test here if we have time
-
 
 if __name__ == "__main__":
   main(*sys.argv[1:])

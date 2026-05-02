@@ -29,11 +29,15 @@ class Agent:
     if random.random() < self.epsilon:
       return random.choice(self.actions)
 
-    return self.actions[np.argmax(self.Q[state])]
+    return self.best_action(state)
 
   # Used in task6.py when finding accuracy
   def best_action(self, state: Point):
-    return self.actions[np.argmax(self.Q[state])]
+    # Can't just use argmax because we need to break ties randomly. This is
+    # equivalent to argmax without ties.
+    A = self.Q[state]
+    a = np.random.choice(np.where(A == A.max())[0])
+    return self.actions[a]
 
   # Getter
   def get_q(self, state: Point, action: Action):
