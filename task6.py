@@ -330,7 +330,7 @@ def main(todo: str = 'all'):
   grid = Map(4)
 
   if todo == 'all':
-    todo = '1,2,3,4'
+    todo = '1,2,3,4,5'
   
   for task in todo.split(','):
     match task:

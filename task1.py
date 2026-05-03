@@ -16,8 +16,8 @@ import matplotlib.pyplot as plt
 MAPS = [ # (name, size, target)
   ("square", 40, 39),
   ("2block", 40, 39),
-  ("stars", 50, 39),
-  ("rooms", 50, 39),
+  ("stars", 40, 39),
+  ("rooms", 40, 39),
   ("zigzag", 40, 39),
   ("spiral", 40, 20)
 ]
