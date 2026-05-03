@@ -3,11 +3,10 @@ Intro to Machine Learning Final
 Encompasses the solution to Task 2.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
-from collections import namedtuple
-from typing import TYPE_CHECKING, Literal, NamedTuple
+from typing import Literal
 import numpy as np
 import matplotlib.pyplot as plt
-from task1 import get_abstract_map
+from task1 import Map
 
 type Action = Literal['up', 'down', 'left', 'right']
 type Reward = int
@@ -21,7 +20,7 @@ def manhattan(s1, s2):
 # The Environment Class
 class GridEnvironment:
   # Constructor that takes name (for plotting purposes), the abstracted map, target pos, and S1/S2
-  def __init__(self, name: int, grid_map: np.ndarray, target: Point, reward_strategy: str="S1"):
+  def __init__(self, name: int, grid_map: Map, target: Point, reward_strategy: str="S1"):
     """
     name: 1, 2, 3, or 4
     grid_map: 2D numpy array (1 = free, 0 = obstacle)
@@ -66,25 +65,30 @@ class GridEnvironment:
       return next_state, 100
 
     # Reward if nothing happens
-    if self.strategy == "S1":
-      return next_state, 0
+    match self.strategy:
+      case "S1":
+        return next_state, 0
 
-    old_dist = manhattan(state, self.target)
-    new_dist = manhattan(next_state, self.target)
+      case "S2":
+        old_dist = manhattan(state, self.target)
+        new_dist = manhattan(next_state, self.target)
 
-    reward = np.sign(old_dist - new_dist)
-    if new_dist < old_dist:
-      reward = +1
-    elif new_dist > old_dist:
-      reward = -1
-    else:
-      reward = 0
+        reward = np.sign(old_dist - new_dist)
+        if new_dist < old_dist:
+          reward = +1
+        elif new_dist > old_dist:
+          reward = -1
+        else:
+          reward = 0
+      
+      case _:
+        raise NotImplementedError(self.strategy)
 
     return next_state, reward
 
   # Plot the map abstraction and target position
   def plot(self):
-    plt.imshow(self.map, cmap="gray", origin="lower")
+    plt.imshow(self.map.data, cmap="gray", origin="lower")
     plt.title(f"Grid Environment {self.name}")
 
     # Mark target
@@ -95,8 +99,8 @@ class GridEnvironment:
 
 # Test
 def main():
-  grid = get_abstract_map(2, 40, 40)
-  env = GridEnvironment(2, grid, target=(39, 39), reward_strategy="S2")
+  grid = Map(2)
+  env = GridEnvironment(2, grid, target=grid.target, reward_strategy="S2")
   state = (38, 38)
   next_state, reward = env.step(state, "right")
   print("Next:", next_state, "Reward:", reward)

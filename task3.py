@@ -7,15 +7,17 @@ import numpy as np
 import random
 
 from task2 import Action, Point
+from util import softmax
 
 # Agent generalized for both SARSA and Q-Learning
 class Agent:
   # Initialize with dimensions for building the Q-table + epsilon
-  def __init__(self, rows: int, cols: int, actions: list[Action], epsilon: float=0.1):
+  def __init__(self, rows: int, cols: int, actions: list[Action], epsilon: float=0.1, policy="argmax"):
     self.rows = rows
     self.cols = cols
     self.actions = actions
     self.epsilon = epsilon
+    self.policy = policy
 
     self.num_actions = len(actions)
 
@@ -33,14 +35,23 @@ class Agent:
 
   # Used in task6.py when finding accuracy
   def best_action(self, state: Point, random: bool=True):
-    # Can't just use argmax because we need to break ties randomly. This is
-    # equivalent to argmax without ties.
-    if random:
-      A = self.Q[state]
-      a = np.random.choice(np.where(A == A.max())[0])
-      return self.actions[a]
-    else:
+    # Deterministic sampling
+    if not random:
       return self.actions[self.Q[state].argmax()]
+    
+    match self.policy:
+      case "argmax":
+        # Can't just use argmax because we need to break ties randomly. This is
+        # equivalent to argmax without ties.
+        A = self.Q[state]
+        return self.actions[np.random.choice(np.where(A == A.max())[0])]
+      
+      case "softmax":
+        P = softmax(self.Q[state]/self.epsilon)
+        return self.actions[np.argmax(np.random.multinomial(1, P))]
+      
+      case _:
+        raise NotImplementedError(self.policy)
     
   # Getter
   def get_q(self, state: Point, action: Action):
