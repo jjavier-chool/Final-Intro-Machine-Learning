@@ -3,6 +3,7 @@ Intro to Machine Learning Final
 Encompasses the solution to Task 6.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
+from typing import Literal
 from task1 import get_abstract_map
 from task2 import GridEnvironment, Point
 from task3 import Agent
@@ -86,11 +87,13 @@ def complexity_test():
   print("\n=== Complexity Test ===")
 
   # TODO: all need to be 40, but first is 20x20. Add enlargening to task1.py
-  target_rows = [40, 40, 40, 40]
-  target_cols = [40, 40, 40, 40]
-  map_episodes = [10000, 10000, 10000, 10000]
+  target_rows = [40, 40, 40, 40, 40]
+  target_cols = [40, 40, 40, 40, 40]
+  #map_episodes = [100]*5
+  #map_episodes = [1000]*5
+  map_episodes = [10000]*5
 
-  for i in range(1,5):
+  for i in range(1, 6):
     grid = get_abstract_map(i, target_rows[i-1], target_cols[i-1])
     '''
     plt.imshow(grid, cmap='gray')
@@ -210,40 +213,78 @@ def softmax(x: np.ndarray):
   a = np.exp(x - x.max(axis=-1, keepdims=True))
   return a/a.sum(axis=-1, keepdims=True)
 
-def plot_policy(agent: Agent, env: GridEnvironment):
+def plot_policy(agent: Agent, env: GridEnvironment, plot: Literal['argmax', 'softmax']="softmax"):
   '''
   Plot an image of the map overlaid with arrows indicating the agent's policy.
   '''
   # Plot the map itself
   plt.imshow(env.map, cmap='gray')
 
-  # For every position, convert the action to its delta to plot an arrow
-  h, w = env.map.shape
-  action_delta = np.array([(-1, 0), (1, 0), (0, -1), (0,1)])
-  flow = softmax(agent.Q) @ action_delta
-  #flow = np.eye(4)[agent.Q.argmax(axis=-1)] @ action_delta
-  dy = flow[..., 0]
-  dx = flow[..., 1]
-  y, x = np.mgrid[0:h, 0:w]
-  plt.quiver(x, y, dx, -dy, color='red')
-
-  # Plot the best path, stopping if it ever loops
+  # Plot the best path, backtracking if it ever loops
+  path: list[tuple[int, Point]] = []
   seen = set()
+  pick = 0
   state = (0, 0)
-  while state != (39, 39):
+  loops = 0
+  pathlen = 0
+  for pathlen in range(1000): # Escape hatch
+    if state == (39, 39):
+      break
     seen.add(state)
     
     r, c = state
-    state, _ = env.step(state, agent.best_action(state, random=False)
+    state, _ = env.step(state, agent.actions[np.argsort(-agent.Q[state])[pick]])
     
     if state in seen:
-      plt.scatter((c + state[1])/2, (r + state[0])/2, s=100, c='red')
-      break
+      loops += 1
+      plt.scatter((c + state[1])/2, (r + state[0])/2, s=100, c='blue')
+      while path:
+        pick, state = path.pop()
+        pick += 1
+        if pick < len(agent.actions):
+          break
     else:
       plt.plot([c, state[1]], [r, state[0]] , c='blue')
+      path.append((0, state))
+      pick = 0
+  
+  # For every position, convert the action to its delta to plot an arrow
+  action_delta = np.array([(-1, 0), (1, 0), (0, -1), (0,1)])
+  
+  match plot:
+    case "argmax":
+      # Argmax plot, more boring
+      flow = np.eye(4)[agent.Q.argmax(axis=-1)] @ action_delta
+    case "softmax":
+      # Softmax plot gives a better sense of what direction a state "prefers"
+      flow = softmax(agent.Q) @ action_delta
+      norm = np.linalg.norm(flow, axis=-1, keepdims=True)
+      out = np.where(
+        env.map[..., np.newaxis] == 0,
+        np.full_like(flow, np.nan),
+        np.zeros_like(flow)
+      )
+      # Avoid a warning with normal division
+      np.divide(flow, norm, out=out, where=norm != 0)
+      flow = out
+    case _:
+      raise NotImplementedError(plot)
+  
+  dy = flow[..., 0]
+  dx = flow[..., 1]
+  h, w = env.map.shape
+  y, x = np.mgrid[0:h, 0:w]
+  plt.quiver(x, y, dx, -dy, color='red', scale=1.41, units='xy')
 
   # Plot the start and goal
   plt.scatter([0, 39], [0, 39])
+
+  if pathlen < 999:
+    plt.text(0, -2, f"path={pathlen}")
+    plt.text(0, -1, f"{loops=}")
+  else:
+    plt.text(0, -2, "path=∞")
+    plt.text(0, -1, f"loops=∞")
 
   plt.axis("equal")
   plt.show()

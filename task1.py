@@ -52,8 +52,8 @@ def get_abstract_map(num: int, rows: int=40, cols: int=40):
 
 # Testing
 def main():
-  rows = [40, 40, 50, 50]
-  cols = [40, 40, 50, 50]
+  rows = [40, 40, 50, 50, 40]
+  cols = [40, 40, 50, 50, 40]
 
   for i, (row, col) in enumerate(zip(rows, cols), 1):
     print(f"Processing: map{i}")
@@ -68,7 +68,7 @@ def main():
     img = Image.fromarray(img_array)
     img.save(f"map{i}.bmp")
 
-    plt.subplot(1, 4, i)
+    plt.subplot(1, 5, i)
     plt.imshow(img, cmap='gray')
   plt.show()
 
