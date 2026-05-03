@@ -4,7 +4,6 @@ Encompasses the solution to Task 3.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 import numpy as np
-import random
 
 from task2 import Action, Point
 from util import softmax
@@ -28,23 +27,11 @@ class Agent:
 
   # Exploration vs exploitation choice
   def choose_action(self, state: Point):
-    if random.random() < self.epsilon:
-      return random.choice(self.actions)
-
-    return self.best_action(state)
-
-  # Used in task6.py when finding accuracy
-  def best_action(self, state: Point, random: bool=True):
-    # Deterministic sampling
-    if not random:
-      return self.actions[self.Q[state].argmax()]
-    
     match self.policy:
       case "argmax":
-        # Can't just use argmax because we need to break ties randomly. This is
-        # equivalent to argmax without ties.
-        A = self.Q[state]
-        return self.actions[np.random.choice(np.where(A == A.max())[0])]
+        if np.random.random() < self.epsilon:
+          return np.random.choice(self.actions)
+        return self.best_action(state)
       
       case "softmax":
         P = softmax(self.Q[state]/self.epsilon)
@@ -52,6 +39,16 @@ class Agent:
       
       case _:
         raise NotImplementedError(self.policy)
+
+  # Used in task6.py when finding accuracy
+  def best_action(self, state: Point, random: bool=True):
+    # Can't just use argmax because we need to break ties randomly. This is
+    # equivalent to argmax without ties.
+    if random:
+      A = self.Q[state]
+      return self.actions[np.random.choice(np.where(A == A.max())[0])]
+    else:
+      return self.actions[self.Q[state].argmax()]
     
   # Getter
   def get_q(self, state: Point, action: Action):
