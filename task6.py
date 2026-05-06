@@ -95,7 +95,7 @@ def complexity_test():
   print("\n=== Complexity Test ===")
   map_episodes = [10000]*len(MAPS)
 
-  for i, _ in enumerate(MAPS[5:], 6):
+  for i, _ in enumerate(MAPS, 1):
     grid = Map(i)
     env = GridEnvironment(i, grid, target=grid.target, reward_strategy="S2")
 
