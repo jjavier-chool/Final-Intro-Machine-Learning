@@ -15,6 +15,12 @@ import sys
 # BMP -> binary matrix. white = 1, black = 0
 def load_bmp_matrix(path, threshold=128):
   img = Image.open(path).convert("L")
+  w, h = img.size
+  if w < 40 or h < 40:
+    # Make it an integer multiple of (w, h) to avoid distortions
+    w = (40 // w + 1)*w
+    h = (40 // h + 1)*h
+    img = img.resize((w, h), resample=Image.Resampling.BOX)
   matrix = np.array(img)
   return (matrix >= threshold).astype(int)
 
@@ -46,8 +52,8 @@ def get_abstract_map(num, target_rows=40, target_cols=40):
 
 # Testing
 def main():
-  target_rows = [20, 40, 50, 50]
-  target_cols = [20, 40, 50, 50]
+  target_rows = [40, 40, 40, 40]
+  target_cols = [40, 40, 40, 40]
   for i in range(1,5):
     print(f"Processing: map{i}")
 
