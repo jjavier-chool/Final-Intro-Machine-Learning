@@ -84,8 +84,8 @@ def complexity_test():
   print("\n=== Complexity Test ===")
 
   # TODO: all need to be 40, but first is 20x20. Add enlargening to task1.py
-  target_rows = [20, 40, 40, 40]
-  target_cols = [20, 40, 40, 40]
+  target_rows = [40, 40, 40, 40]
+  target_cols = [40, 40, 40, 40]
   map_episodes = [10000, 10000, 10000, 10000]
 
   for i in range(1,5):
@@ -93,7 +93,7 @@ def complexity_test():
     env = GridEnvironment(i, grid, target=(39, 39), reward_strategy="S2")
 
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=0.5, gamma=0.5, map_episodes[i-1])
+      agent, t = train(env, method, epsilon=0.5, gamma=0.5, episodes=map_episodes[i-1])
 
       acc, avg_len, longest = accuracy_path(env, agent)
 
@@ -109,7 +109,7 @@ def exploration_test(grid):
 
   for eps in [0, 0.5, 1]:
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=eps, gamma=0.5, tune_episodes[i])
+      agent, t = train(env, method, epsilon=eps, gamma=0.5, episodes=tune_episodes[i])
 
       acc, avg_len, longest = accuracy_path(env, agent)
 
@@ -126,7 +126,7 @@ def discount_test(grid):
 
   for gamma in [0.1, 0.5, 1]:
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=0.5, gamma=gamma, tune_episodes[i])
+      agent, t = train(env, method, epsilon=0.5, gamma=gamma, episodes=tune_episodes[i])
 
       acc, avg_len, longest = accuracy_path(env, agent)
 
@@ -144,10 +144,10 @@ def reward_test(grid):
   i = 0
 
   for strategy in ["S1", "S2"]:
-    env = GridEnvironment(4, grid, target=(39, 39), reward_strategy=strategy)
+    env = GridEnvironment(4, grid, target=(grid.shape[0]-1, grid.shape[1]-1), reward_strategy=strategy)
 
     for method in ["SARSA", "Q"]:
-      agent, t = train(env, method, epsilon=best_eps, gamma=best_gamma, tune_episodes[i])
+      agent, t = train(env, method, epsilon=best_eps, gamma=best_gamma, episodes=tune_episodes[i])
 
       acc, avg_len, longest = accuracy_path(env, agent)
 
@@ -157,7 +157,7 @@ def reward_test(grid):
 # Main
 def main(todo: str = 'all'):
   torch.manual_seed(42)
-  grid = get_abstract_map(4, 50, 50)
+  grid = get_abstract_map(4, 40, 40)
 
   if todo == '1' or todo == 'all':
     complexity_test()
