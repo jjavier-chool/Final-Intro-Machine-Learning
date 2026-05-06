@@ -10,11 +10,10 @@ import numpy as np
 def q_learning(env, agent, episodes=5000, alpha=0.1, gamma=0.9, start_state=(0, 0), max_steps=1000):
   for ep in tqdm(range(episodes), desc="Q-Learning Training"):
     state = start_state
-    action = agent.choose_action(state)
 
     for _ in range(max_steps):
+      action = agent.choose_action(state)
       next_state, reward = env.step(state, action)
-      next_action = agent.choose_action(next_state)
 
       # Same as SARSA except this section, want max
       q = agent.get_q(state, action)
@@ -24,7 +23,7 @@ def q_learning(env, agent, episodes=5000, alpha=0.1, gamma=0.9, start_state=(0, 
       new_q = q + alpha * (reward + gamma * q_next_max - q)
       agent.set_q(state, action, new_q)
 
-      state, action = next_state, next_action
+      state = next_state
 
       if state == env.target:
         break
