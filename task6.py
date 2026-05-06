@@ -115,7 +115,7 @@ def complexity_test():
       ]))
       print()
 
-      plot_policy(agent, env)
+      plot_policy(f"test1/map{i}-{method}", agent, env)
 
 # 2. Exploration Test
 def exploration_test(grid: Map):
@@ -143,7 +143,7 @@ def exploration_test(grid: Map):
       print()
       i = i + 1
 
-      plot_policy(agent, env)
+      plot_policy(f"test2/{i}-eps={eps:.1f}-{method}", agent, env)
 
 # 3. Discount Test
 def discount_test(grid: Map):
@@ -171,7 +171,7 @@ def discount_test(grid: Map):
       print()
       i = i + 1
 
-      plot_policy(agent, env)
+      plot_policy(f"test3/{i}-gamma={gamma:.1f}-{method}", agent, env)
 
 # 4. Reward Strategy Test
 def reward_test(grid: Map):
@@ -203,7 +203,7 @@ def reward_test(grid: Map):
       print()
       i = i + 1
 
-      plot_policy(agent, env)
+      plot_policy(f"test4/{i}-{strategy}-{method}", agent, env)
 
 # 5. (extra) Softmax vs Argmax
 def policy_test(grid: Map):
@@ -241,9 +241,9 @@ def policy_test(grid: Map):
         print()
         i = i + 1
 
-        plot_policy(agent, env)
+        plot_policy(f"test5/{i}-{policy}-{method}-T={T:.1f}", agent, env)
 
-def plot_policy(agent: Agent, env: GridEnvironment, plot: Literal['argmax', 'softmax']="softmax"):
+def plot_policy(name: str, agent: Agent, env: GridEnvironment, plot: Literal['argmax', 'softmax']="softmax"):
   '''
   Plot an image of the map overlaid with arrows indicating the agent's policy.
   '''
@@ -322,7 +322,8 @@ def plot_policy(agent: Agent, env: GridEnvironment, plot: Literal['argmax', 'sof
     plt.text(0, -1, f"loops=∞")
 
   plt.axis("equal")
-  plt.show()
+  plt.savefig(f"output/{name}.png")
+  #plt.show()
 
 # Main
 def main(todo: str = 'all'):
