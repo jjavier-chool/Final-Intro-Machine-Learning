@@ -8,6 +8,7 @@ import numpy as np
 
 from task2 import GridEnvironment, Point
 from task3 import Agent
+from util import accuracy_path
 
 # Q-Learning algorithm, adopted from the slides' pseudocode
 def q_learning(
@@ -19,6 +20,8 @@ def q_learning(
     start_state: Point=(0, 0),
     max_steps: int=1000
   ):
+  accs = [0]
+
   for ep in tqdm(range(episodes), desc="Q-Learning Training"):
     state = start_state
 
@@ -37,3 +40,12 @@ def q_learning(
 
       if state == env.target:
         break
+    
+    if (ep + 1) % 100 == 0:
+      acc, _, _ = accuracy_path(env, agent)
+      diff = acc - accs[-1]
+      accs.append(acc)
+      if 0 < diff < 0.01:
+        break
+    
+  return accs

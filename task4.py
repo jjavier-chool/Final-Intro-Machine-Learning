@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from task2 import GridEnvironment, Point
 from task3 import Agent
+from util import accuracy_path
 
 # SARSA algorithm, adopted from the slides' pseudocode
 def sarsa(
@@ -18,6 +19,8 @@ def sarsa(
     start_state: Point=(0, 0),
     max_steps: int=1000
   ):
+  accs = [0]
+
   # "Loop for each episode"
   for ep in tqdm(range(episodes), desc="SARSA Training"):
     # Init S, choose A from S using policy derived from Q
@@ -44,3 +47,12 @@ def sarsa(
       # Until S is terminal
       if state == env.target:
         break
+    
+    if (ep + 1) % 100 == 0:
+      acc, _, _ = accuracy_path(env, agent)
+      diff = acc - accs[-1]
+      accs.append(acc)
+      if 0 < diff < 0.01:
+        break
+  
+  return accs
