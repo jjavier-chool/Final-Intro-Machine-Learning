@@ -265,7 +265,8 @@ def plot_policy(name: str, agent: Agent, env: GridEnvironment, plot: Literal['ar
       flow = softmax(agent.Q) @ action_delta
       norm = np.linalg.norm(flow, axis=-1, keepdims=True)
       # Avoid a warning with normal division
-      np.divide(flow, norm, out=np.zeros_like(flow), where=norm != 0)
+      flow = np.divide(flow, norm, out=np.zeros_like(flow), where=norm != 0)
+      # Don't draw on obstacles
       flow = np.where(env.map[..., np.newaxis] == 0, np.nan, flow)
     case _:
       raise NotImplementedError(plot)
@@ -303,6 +304,8 @@ def main(todo: str = 'all'):
       case '3': discount_test(grid)
       case '4': reward_test(grid)
       case '5': policy_test(grid)
+      case _:
+        print("Unknown task", task)
   
   # Extra custom map test here if we have time
 
