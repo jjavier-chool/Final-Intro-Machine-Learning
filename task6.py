@@ -264,14 +264,9 @@ def plot_policy(name: str, agent: Agent, env: GridEnvironment, plot: Literal['ar
       # Softmax plot gives a better sense of what direction a state "prefers"
       flow = softmax(agent.Q) @ action_delta
       norm = np.linalg.norm(flow, axis=-1, keepdims=True)
-      out = np.where(
-        env.map[..., np.newaxis] == 0,
-        np.full_like(flow, np.nan),
-        np.zeros_like(flow)
-      )
       # Avoid a warning with normal division
-      np.divide(flow, norm, out=out, where=norm != 0)
-      flow = out
+      np.divide(flow, norm, out=np.zeros_like(flow), where=norm != 0)
+      flow = np.where(env.map[..., np.newaxis] == 0, np.nan, flow)
     case _:
       raise NotImplementedError(plot)
   
