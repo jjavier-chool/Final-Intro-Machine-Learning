@@ -20,7 +20,16 @@ def q_learning(
     start_state: Point=(0, 0),
     max_steps: int=1000
   ):
-  accs = [0]
+  MIN = 0.25 # Minimum accuracy before considering runs
+  LO = -0.2 # How much drop to restart a run
+  HI = 0.01 # How much rise to count towards a run
+  ALPHA = 0.618 # How much new information to incorporate
+  RUN = 5 # How long a run should be
+
+  accs = [0.]
+  ewma = 0
+  run = 0
+  below_min = True
 
   for ep in tqdm(range(episodes), desc="Q-Learning Training"):
     state = start_state
@@ -43,9 +52,23 @@ def q_learning(
     
     if (ep + 1) % 100 == 0:
       acc, _, _ = accuracy_path(env, agent)
-      diff = acc - accs[-1]
-      accs.append(acc)
-      if 0 < diff < 0.01:
-        break
+      diff = acc - ewma
+      ewma = ewma*(1 - ALPHA) + acc*ALPHA
+      accs.append(ewma)
+
+      if below_min:
+        if acc < MIN:
+          continue
+        below_min = False
+      
+      if diff > 0:
+        if diff < HI:
+          run += 1
+          if run > RUN:
+              break
+        else:
+          run = 0
+      elif diff < LO:
+        run = 0
     
   return accs

@@ -5,6 +5,7 @@ Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from typing import TYPE_CHECKING
 import numpy as np
+import torch
 
 # Without this it's a circular dependency
 if TYPE_CHECKING:
@@ -12,8 +13,8 @@ if TYPE_CHECKING:
   from task3 import Agent
 
 def softmax(x: np.ndarray):
-  e = np.exp(x)
-  return e/e.sum()
+  e = np.exp(x - x.max())
+  return e/e.sum(axis=0)
 
 # Helper: accuracy + extra path metrics
 #TODO: length kinda pointless? remove?

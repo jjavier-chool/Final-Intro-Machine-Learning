@@ -20,7 +20,7 @@ from util import softmax, accuracy_path
 
 # Helper: Train
 #TODO: tune episodes for each test
-def train(env: GridEnvironment, method: str, epsilon: float, gamma: float, episodes: int=10000, policy="argmax"):
+def train(name: str, env: GridEnvironment, method: str, epsilon: float, gamma: float, episodes: int=10000, policy="argmax"):
   agent = Agent(
     env.rows, env.cols,
     ["up", "down", "left", "right"],
@@ -39,12 +39,13 @@ def train(env: GridEnvironment, method: str, epsilon: float, gamma: float, episo
   elapsed = time.time() - start
   plt.clf()
   plt.plot(acc)
-  plt.show()
+  #plt.show()
+  plt.savefig(f"output/{name}-accuracy.png")
   return agent, elapsed, acc
 
 # 1. Complexity Test
 def complexity_test():
-  print("\n=== Complexity Test ===")
+  print("\n=== 1. Complexity Test ===")
   map_episodes = [10000]*len(MAPS)
   i = 0
   strategy = "S2"
@@ -53,9 +54,10 @@ def complexity_test():
     env = GridEnvironment(m, grid, target=grid.target, reward_strategy=strategy)
 
     for method in ["SARSA", "Q"]:
-      agent, t, accs = train(env, method, epsilon=0.5, gamma=0.5, episodes=map_episodes[m-1])
+      name = f"test1/map{m}-{method}-{strategy}"
+      agent, t, accs = train(name, env, method, epsilon=0.5, gamma=0.5, episodes=map_episodes[m-1])
 
-      acc, avg, longest = accuracy_path(env, agent)
+      acc, avg_len, longest = accuracy_path(env, agent)
 
       print(" | ".join([
         f"map {m}",
@@ -63,16 +65,17 @@ def complexity_test():
         strategy,
         f"{t=:.2f}s",
         f"{acc=:.3f}",
-        f"episodes={len(accs)}"
+        f"episodes={(len(accs) - 1)*100}",
+        f"{avg_len=:.1f}"
       ]))
       print()
 
       i += 1
-      plot_policy(f"test1/{i}-map{m}-{method}-{strategy}", agent, env)
+      plot_policy(name, agent, env)
 
 # 2. Exploration Test
 def exploration_test(grid: Map):
-  print("\n=== Exploration Test ===")
+  print("\n=== 2. Exploration Test ===")
 
   strategy = "S2"
   env = GridEnvironment(4, grid, target=grid.target, reward_strategy=strategy)
@@ -81,9 +84,10 @@ def exploration_test(grid: Map):
 
   for method in ["SARSA", "Q"]:
     for eps in [0, 0.5, 1]:
-      agent, t, accs = train(env, method, epsilon=eps, gamma=0.5, episodes=tune_episodes[i])
+      name = f"test2/{method}-{strategy}-eps={eps:.1f}"
+      agent, t, accs = train(name, env, method, epsilon=eps, gamma=0.5, episodes=tune_episodes[i])
 
-      acc, avg, longest = accuracy_path(env, agent)
+      acc, avg_len, longest = accuracy_path(env, agent)
 
       print(" | ".join([
         f"{eps=}",
@@ -91,16 +95,17 @@ def exploration_test(grid: Map):
         strategy,
         f"{t=:.2f}s",
         f"{acc=:.3f}",
-        f"episodes={len(accs)}"
+        f"episodes={(len(accs) - 1)*100}",
+        f"{avg_len=:.1f}"
       ]))
       print()
       i = i + 1
 
-      plot_policy(f"test2/{i}-{method}-{strategy}-eps={eps:.1f}", agent, env)
+      plot_policy(name, agent, env)
 
 # 3. Discount Test
 def discount_test(grid: Map):
-  print("\n=== Discount Test ===")
+  print("\n=== 3. Discount Test ===")
 
   strategy = "S2"
   env = GridEnvironment(4, grid, target=grid.target, reward_strategy=strategy)
@@ -109,9 +114,10 @@ def discount_test(grid: Map):
 
   for method in ["SARSA", "Q"]:
     for gamma in [0.1, 0.5, 1]:
-      agent, t, accs = train(env, method, epsilon=0.5, gamma=gamma, episodes=tune_episodes[i])
+      name = f"test3/{method}-{strategy}-gamma={gamma:.1f}"
+      agent, t, accs = train(name, env, method, epsilon=0.5, gamma=gamma, episodes=tune_episodes[i])
 
-      acc, avg, longest = accuracy_path(env, agent)
+      acc, avg_len, longest = accuracy_path(env, agent)
 
       print(" | ".join([
         f"{gamma=}",
@@ -119,16 +125,17 @@ def discount_test(grid: Map):
         strategy,
         f"{t=:.2f}s",
         f"{acc=:.3f}",
-        f"episodes={len(accs)}"
+        f"episodes={(len(accs) - 1)*100}",
+        f"{avg_len=:.1f}"
       ]))
       print()
       i = i + 1
 
-      plot_policy(f"test3/{i}-{method}-{strategy}-gamma={gamma:.1f}", agent, env)
+      plot_policy(name, agent, env)
 
 # 4. Reward Strategy Test
 def reward_test(grid: Map):
-  print("\n=== Reward Strategy Test ===")
+  print("\n=== 4. Reward Strategy Test ===")
 
   tune_episodes = [10000]*len(MAPS)
   i = 0
@@ -140,11 +147,13 @@ def reward_test(grid: Map):
       # From previous 2 tests
       if method == "SARSA":
         best_eps = 0.5
+        best_gamma = 1
       else:
         best_eps = 1
-      best_gamma = 0.5
+        best_gamma = 0.5
 
-      agent, t, accs = train(env, method, best_eps, best_gamma, tune_episodes[i])
+      name = f"test4/{strategy}-{method}"
+      agent, t, accs = train(name, env, method, best_eps, best_gamma, tune_episodes[i])
 
       acc, avg_len, longest = accuracy_path(env, agent)
 
@@ -153,16 +162,17 @@ def reward_test(grid: Map):
         f"{method:^5}",
         f"time={t:.2f}s",
         f"{acc=:.3f}",
-        f"episodes={len(accs)}"
+        f"episodes={(len(accs) - 1)*100}",
+        f"{avg_len=:.1f}"
       ]))
       print()
       i = i + 1
 
-      plot_policy(f"test4/{i}-{strategy}-{method}", agent, env)
+      plot_policy(name, agent, env)
 
 # 5. (extra) Softmax vs Argmax
 def policy_test(grid: Map):
-  print("\n=== Policy Sampling Test ===")
+  print("\n=== 5. Policy Sampling Test ===")
 
   # TODO: Find from previous tests
   best_eps = 0.5
@@ -179,22 +189,24 @@ def policy_test(grid: Map):
       else:
         schedule = [best_eps]
       for T in schedule:
-        agent, t, accs = train(env, method, T, best_gamma, tune_episodes, policy=policy)
+        name = f"test5/{policy}-{method}-T={T:.1f}"
+        agent, t, accs = train(name, env, method, T, best_gamma, tune_episodes, policy=policy)
 
         acc, avg_len, longest = accuracy_path(env, agent)
 
         print(' | '.join([
-          policy,
+          f"{policy:^5}",
           method,
           f"{T=:.2f}",
           f"time={t:.2f}s",
           f"{acc=:.3f}",
-          f"episodes={len(accs)}"
+          f"episodes={(len(accs) - 1)*100}",
+          f"{avg_len=:.1f}"
         ]))
         print()
         i = i + 1
 
-        plot_policy(f"test5/{i}-{policy}-{method}-T={T:.1f}", agent, env)
+        plot_policy(name, agent, env)
 
 def plot_policy(name: str, agent: Agent, env: GridEnvironment, plot: Literal['argmax', 'softmax']="softmax"):
   '''
@@ -283,6 +295,7 @@ def plot_policy(name: str, agent: Agent, env: GridEnvironment, plot: Literal['ar
 # Main
 def main(todo: str = 'all'):
   torch.manual_seed(42)
+  np.random.seed(42)
   grid = Map(4)
 
   if todo == 'all':
