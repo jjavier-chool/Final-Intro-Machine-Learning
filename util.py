@@ -1,6 +1,6 @@
 """
 Intro to Machine Learning Final
-Utilities used by multiple tasks
+Utilities used by multiple tasks.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from typing import TYPE_CHECKING
@@ -12,12 +12,12 @@ if TYPE_CHECKING:
   from task2 import GridEnvironment
   from task3 import Agent
 
+# For policy test
 def softmax(x: np.ndarray):
   e = np.exp(x - x.max())
   return e/e.sum(axis=0)
 
 # Helper: accuracy + extra path metrics
-#TODO: length kinda pointless? remove?
 def accuracy_path(env: 'GridEnvironment', agent: 'Agent', max_steps: int=500):
   rows, cols = env.rows, env.cols
 
@@ -32,7 +32,7 @@ def accuracy_path(env: 'GridEnvironment', agent: 'Agent', max_steps: int=500):
 
       state = (r, c)
       total += 1
-      # Need this in order to prevent loops right?
+      # Need this in order to prevent loops
       visited = set()
       steps = 0
       success = False
@@ -47,12 +47,11 @@ def accuracy_path(env: 'GridEnvironment', agent: 'Agent', max_steps: int=500):
 
         visited.add(state)
 
-        # Pretty sure it's correct to do the best action here
         action = agent.best_action(state)
         next_state, _ = env.step(state, action)
 
         if next_state == state:
-          break  # Invalid to just stand in place
+          break  # Invalid to just stand in place (obstacle, out of bounds)
 
         state = next_state
         steps += 1

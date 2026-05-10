@@ -4,7 +4,6 @@ Encompasses the solution to Task 4.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from tqdm import tqdm
-
 from task2 import GridEnvironment, Point
 from task3 import Agent
 from util import accuracy_path
@@ -56,7 +55,9 @@ def sarsa(
       # Until S is terminal
       if state == env.target:
         break
-    
+
+    # Find accuracy per 100 episodes for plotting purposes + early stop used when tuning episodes
+    '''
     if (ep + 1) % 100 == 0:
       acc, _, _ = accuracy_path(env, agent)
       diff = acc - ewma
@@ -77,5 +78,5 @@ def sarsa(
           run = 0
       elif diff < LO:
         run = 0
-  
+    '''
   return accs

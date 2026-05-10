@@ -1,11 +1,12 @@
 """
 Intro to Machine Learning Final
 Encompasses the solution to Task 1.
-Map1: 20x20 (keep)
+Map1: 20x20 -> 40x40
 Map2: 400x400 -> 40x40
-Map3: 532x528 -> 50x50?
-Map4: 532x528 -> 50x50?
-Custom (Map5): ?
+Map3: 532x528 -> 40x40
+Map4: 532x528 -> 40x40
+Map5: 400x400 -> 40x40
+Map6: 400x400 -> 40x40
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from typing import Any
@@ -13,6 +14,7 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Defines the size and target location for each map for the task6 tests
 MAPS = [ # (name, size, target)
   ("square", 40, 39),
   ("2block", 40, 39),
@@ -34,6 +36,7 @@ def load_bmp_matrix(path: str, threshold=128):
   matrix = np.array(img)
   return (matrix >= threshold).astype(int)
 
+# Class that defines a map's name, dimensions, target location, and original file + abstraction.
 class Map:
   def __init__(self, num: int):#, binary_map: np.ndarray, rows: int, cols: int, target: int):
     name, size, target = MAPS[num-1]
@@ -41,6 +44,8 @@ class Map:
     self.name = name
     self.num = num
     self.target = (target, target)
+
+    # Building abstraction via "pooling" starts here
     binary_map = load_bmp_matrix(f"maps/map{num}.bmp")
     orig_rows, orig_cols = binary_map.shape
     abstracted = np.ones((rows, cols), dtype=int)
@@ -57,20 +62,20 @@ class Map:
 
         if np.any(block == 0):
           abstracted[i, j] = 0
-    
+
     self.data = abstracted
-  
+
   def __getitem__(self, index: Any):
     return self.data[index]
 
   @property
   def shape(self):
     return self.data.shape
-  
+
   @property
   def rows(self):
     return self.data.shape[0]
-  
+
   @property
   def cols(self):
     return self.data.shape[1]

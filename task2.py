@@ -10,13 +10,12 @@ from task1 import Map
 
 type Action = Literal['up', 'down', 'left', 'right']
 type Reward = int
-
 type Point = tuple[int, int]
 
 # For S2, closer to target reward calculation
 def manhattan(s1, s2):
   return abs(s1[0] - s2[0]) + abs(s1[1] - s2[1])
-  
+
 # The Environment Class
 class GridEnvironment:
   # Constructor that takes name (for plotting purposes), the abstracted map, target pos, and S1/S2
@@ -80,7 +79,7 @@ class GridEnvironment:
           reward = -1
         else:
           reward = 0
-      
+
       case _:
         raise NotImplementedError(self.strategy)
 

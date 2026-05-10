@@ -5,7 +5,6 @@ Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from tqdm import tqdm
 import numpy as np
-
 from task2 import GridEnvironment, Point
 from task3 import Agent
 from util import accuracy_path
@@ -49,7 +48,9 @@ def q_learning(
 
       if state == env.target:
         break
-    
+
+    # Again, after the actual algorithm above find the accuracy per 100 episodes + early stopping
+    '''
     if (ep + 1) % 100 == 0:
       acc, _, _ = accuracy_path(env, agent)
       diff = acc - ewma
@@ -60,7 +61,7 @@ def q_learning(
         if acc < MIN:
           continue
         below_min = False
-      
+
       if diff > 0:
         if diff < HI:
           run += 1
@@ -70,5 +71,5 @@ def q_learning(
           run = 0
       elif diff < LO:
         run = 0
-    
+    '''
   return accs
