@@ -1,19 +1,31 @@
 """
 Intro to Machine Learning Final
 Encompasses the solution to Task 1.
-Map1: 20x20 (keep)
+Map1: 20x20 -> 40x40
 Map2: 400x400 -> 40x40
-Map3: 532x528 -> 50x50?
-Map4: 532x528 -> 50x50?
-Custom (Map5): ?
+Map3: 532x528 -> 40x40
+Map4: 532x528 -> 40x40
+Map5: 400x400 -> 40x40
+Map6: 400x400 -> 40x40
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
+from typing import Any
 from PIL import Image
 import numpy as np
-import sys
+import matplotlib.pyplot as plt
+
+# Defines the size and target location for each map for the task6 tests
+MAPS = [ # (name, size, target)
+  ("square", 40, 39),
+  ("2block", 40, 39),
+  ("stars", 40, 39),
+  ("rooms", 40, 39),
+  ("zigzag", 40, 39),
+  ("spiral", 40, 20)
+]
 
 # BMP -> binary matrix. white = 1, black = 0
-def load_bmp_matrix(path, threshold=128):
+def load_bmp_matrix(path: str, threshold=128):
   img = Image.open(path).convert("L")
   w, h = img.size
   if w < 40 or h < 40:
@@ -24,53 +36,70 @@ def load_bmp_matrix(path, threshold=128):
   matrix = np.array(img)
   return (matrix >= threshold).astype(int)
 
-# Build abstraction via pooling. Any black pixels -> black (= 0)
-def abstract_map(binary_map, target_rows, target_cols):
-  orig_rows, orig_cols = binary_map.shape
-  abstracted = np.ones((target_rows, target_cols), dtype=int)
+# Class that defines a map's name, dimensions, target location, and original file + abstraction.
+class Map:
+  def __init__(self, num: int):#, binary_map: np.ndarray, rows: int, cols: int, target: int):
+    name, size, target = MAPS[num-1]
+    rows = cols = size
+    self.name = name
+    self.num = num
+    self.target = (target, target)
 
-  for i in range(target_rows):
-    for j in range(target_cols):
-      r_start = int(i * orig_rows / target_rows)
-      r_end   = int((i + 1) * orig_rows / target_rows)
+    # Building abstraction via "pooling" starts here
+    binary_map = load_bmp_matrix(f"maps/map{num}.bmp")
+    orig_rows, orig_cols = binary_map.shape
+    abstracted = np.ones((rows, cols), dtype=int)
 
-      c_start = int(j * orig_cols / target_cols)
-      c_end   = int((j + 1) * orig_cols / target_cols)
+    for i in range(rows):
+      for j in range(cols):
+        r_start = i * orig_rows // rows
+        r_end   = (i + 1) * orig_rows // rows
 
-      block = binary_map[r_start:r_end, c_start:c_end]
+        c_start = j * orig_cols // cols
+        c_end   = (j + 1) * orig_cols // cols
 
-      if np.any(block == 0):
-        abstracted[i, j] = 0
+        block = binary_map[r_start:r_end, c_start:c_end]
 
-  return abstracted
+        if np.any(block == 0):
+          abstracted[i, j] = 0
 
-# Retrieve the specific map asked for
-def get_abstract_map(num, target_rows=40, target_cols=40):
-  path = "maps/map" + str(num) + ".bmp"
-  og_map = load_bmp_matrix(path)
-  return abstract_map(og_map, target_rows, target_cols)
+    self.data = abstracted
+
+  def __getitem__(self, index: Any):
+    return self.data[index]
+
+  @property
+  def shape(self):
+    return self.data.shape
+
+  @property
+  def rows(self):
+    return self.data.shape[0]
+
+  @property
+  def cols(self):
+    return self.data.shape[1]
 
 # Testing
 def main():
-  target_rows = [40, 40, 40, 40]
-  target_cols = [40, 40, 40, 40]
-  for i in range(1,5):
-    print(f"Processing: map{i}")
+  for i, (name, _, _) in enumerate(MAPS, 1):
+    print(f"Processing: map{i} ({name})")
 
-    og_map = load_bmp_matrix("maps/map" + str(i) + ".bmp")
-    abstracted = abstract_map(og_map, target_rows[i-1], target_cols[i-1])
+    og_map = load_bmp_matrix(f"maps/map{i}.bmp")
+    abstracted = Map(i)
 
-    og_shape = og_map.shape
-    new_shape = abstracted.shape
+    print(f"Original size: {og_map.shape}")
+    print(f"Abstracted size: {abstracted.shape}")
+    img_array = (abstracted.data * 255).astype(np.uint8)
+    # mode parameter is deprecated in .fromarray PIL 15
+    img = Image.fromarray(img_array)
+    img.save(f"map{i}.bmp")
 
-    print(f"Original size: {og_shape}")
-    print(f"Abstracted size: {new_shape}")
-    img_array = (abstracted * 255).astype(np.uint8)
-    img = Image.fromarray(img_array, mode='L')
-    img.save("map" + str(i) + ".bmp")
+    plt.subplot(1, len(MAPS), i)
+    plt.imshow(img, cmap='gray')
+  plt.show()
 
   print("All maps processed successfully.")
-
 
 if __name__ == "__main__":
     main()

@@ -4,9 +4,31 @@ Encompasses the solution to Task 4.
 Students: Jackie Javier, Pranitha Achanta, Robert McDaniels
 """
 from tqdm import tqdm
+from task2 import GridEnvironment, Point
+from task3 import Agent
+from util import accuracy_path
 
 # SARSA algorithm, adopted from the slides' pseudocode
-def sarsa(env, agent, episodes=5000, alpha=0.1, gamma=0.9, start_state=(0, 0), max_steps=1000):
+def sarsa(
+    env: GridEnvironment,
+    agent: Agent,
+    episodes: int=5000,
+    alpha: float=0.1,
+    gamma: float=0.9,
+    start_state: Point=(0, 0),
+    max_steps: int=1000
+  ):
+  MIN = 0.25 # Minimum accuracy before considering runs
+  LO = -0.2 # How much drop to restart a run
+  HI = 0.01 # How much rise to count towards a run
+  ALPHA = 0.618 # How much new information to incorporate
+  RUN = 5 # How long a run should be
+
+  accs = [0.]
+  ewma = 0
+  run = 0
+  below_min = True
+
   # "Loop for each episode"
   for ep in tqdm(range(episodes), desc="SARSA Training"):
     # Init S, choose A from S using policy derived from Q
@@ -33,3 +55,28 @@ def sarsa(env, agent, episodes=5000, alpha=0.1, gamma=0.9, start_state=(0, 0), m
       # Until S is terminal
       if state == env.target:
         break
+
+    # Find accuracy per 100 episodes for plotting purposes + early stop used when tuning episodes
+    '''
+    if (ep + 1) % 100 == 0:
+      acc, _, _ = accuracy_path(env, agent)
+      diff = acc - ewma
+      ewma = ewma*(1 - ALPHA) + acc*ALPHA
+      accs.append(ewma)
+
+      if below_min:
+        if acc < MIN:
+          continue
+        below_min = False
+
+      if diff > 0:
+        if diff < HI:
+          run += 1
+          if run > RUN:
+              break
+        else:
+          run = 0
+      elif diff < LO:
+        run = 0
+    '''
+  return accs
