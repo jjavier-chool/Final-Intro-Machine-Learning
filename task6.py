@@ -145,7 +145,6 @@ def reward_test(grid: Map):
     for method in ["SARSA", "Q"]:
       # From previous 2 tests
       if method == "SARSA":
-        continue
         best_eps = 0.5
         best_gamma = 0.1
       else:
