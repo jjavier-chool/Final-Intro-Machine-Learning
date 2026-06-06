@@ -1,5 +1,5 @@
 # Final-Intro-Machine-Learning
-The final project for CS429.
+The final project for CS429. Investigates the main mechanisms and design principles of Reinforcement Learning.
 
 ## How to Run
 You can run tasks manually using each of:
