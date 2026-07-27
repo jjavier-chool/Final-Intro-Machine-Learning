@@ -35,3 +35,6 @@ Reactivate with:
 ```console
 source final-env/bin/activate
 ```
+
+## TODO (for fun)
+Visually show the agent traversing the environment in an animation rather than just a generated map result image.
